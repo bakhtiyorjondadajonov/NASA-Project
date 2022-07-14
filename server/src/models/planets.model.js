@@ -12,30 +12,7 @@ function isHabitable(planet) {
     planet["koi_prad"] < 1.6
   );
 }
-// fs.createReadStream(path.join(__dirname, "..", "data", "kepler_data.csv"))
-//   .pipe(
-//     parse({
-//       comment: "#",
-//       columns: true,
-//     })
-//   )
-//   .on("data", (data) => {
-//     if (isHabitable(data)) {
-//       habitablePlanets.push(data);
-//     }
-//   })
-//   .on("error", (err) => {
-//     console.log(err);
-//   })
-//   .on("end", () => {
-//     habitablePlanets.map((planet) => planet.kepoi_name);
-//     console.log(habitablePlanets.length);
-//     console.log("done");
-//     const planets = habitablePlanets;
-//     module.exports = {
-//       planets: habitablePlanets,
-//     };
-//   });
+
 const loadPlanetsData = async () => {
   await new Promise((resolve, reject) => {
     fs.createReadStream(path.join(__dirname, "..", "data", "kepler_data.csv"))
@@ -63,7 +40,10 @@ const loadPlanetsData = async () => {
     resolve();
   });
 };
+const getAllPlanets = () => {
+  return habitablePlanets;
+};
 module.exports = {
   loadPlanetsData,
-  planets: habitablePlanets,
+  getAllPlanets,
 };
