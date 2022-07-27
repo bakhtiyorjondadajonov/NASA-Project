@@ -3,11 +3,15 @@ const {
   addNewLouch,
   existslauncheWithId,
   abortLaunchById,
+  scheduleNewLaunch,
 } = require("../../models/lounches.model");
-const httpGetAllLounches = (req, res) => {
-  return res.status(200).json(getAllLaunches());
+const { getPagination } = require("../../services/query");
+const httpGetAllLounches = async (req, res) => {
+  const { skip, limit } = getPagination(req.query);
+  const launches = await getAllLaunches(skip, limit);
+  return res.status(200).json(launches);
 };
-const httpAddNewLounch = (req, res) => {
+const httpAddNewLounch = async (req, res) => {
   const launch = {
     target: req.body.target,
     launchDate: new Date(req.body.launchDate),
@@ -26,21 +30,25 @@ const httpAddNewLounch = (req, res) => {
       message: "Missing required lounch properity or Invalid date input",
     });
   } else {
-    addNewLouch(launch);
+    await scheduleNewLaunch(launch);
     return res.status(201).json({
       status: "Success",
       data: launch,
     });
   }
 };
-const httpAbortLaunch = (req, res) => {
+const httpAbortLaunch = async (req, res) => {
   const launchId = +req.params.id;
 
   //if launch does not exist
-  if (existslauncheWithId(launchId)) {
+  const existsLaunch = await existslauncheWithId(launchId);
+  if (existsLaunch) {
     //if launch does  exist
-    const aborted = abortLaunchById(launchId);
-    return res.status(200).json(aborted);
+    const aborted = await abortLaunchById(launchId);
+    if (!aborted) {
+      return res.status(400).json({ error: "Launch not aborted" });
+    }
+    return res.status(200).json({ ok: true });
   } else {
     return res.status(404).json({
       error: "Launch not found",
